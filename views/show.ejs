@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+<% layout("/layouts/boilerplate") %>
     <h1>Show</h1>
     <video id="videoPlayer" controls width="600">
         <source src="<%=showVideo.video.url.replace('watch?v=','embed/')%>">
@@ -13,6 +6,12 @@
 <!-- 
     <iframe src="<%=showVideo.video.url.replace('watch?v=','embed/')%>" frameborder="0" height="350" width="600" allowfullscreen></iframe> -->
     <p><%=showVideo.title%></p>
+    <form action="/home/show/edit/<%=showVideo._id%>">
+                <button>Edit</button>
+            </form>
+            <form action="/home/show/<%=showVideo._id%>?_method=DELETE" method="POST">
+                <button>Delete</button>
+            </form>
 
     <div>
         <h4>All Videos</h4>
@@ -24,5 +23,3 @@
             <%}%>
         
     </div>
-</body>
-</html>

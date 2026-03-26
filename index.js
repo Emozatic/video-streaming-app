@@ -3,10 +3,14 @@ const app= express();
 const mongoose= require("mongoose");
 const path= require("path");
 const Video= require("./models/videos");
+const methodOverride=  require("method-override")
+const ejsMate= require("ejs-mate");
 
 app.set("view engine","ejs");
+app.engine("ejs",ejsMate);
 app.set("views",path.join(__dirname,"/views"));
 app.use(express.urlencoded({extended:true}));
+app.use(methodOverride("_method"));
 
 async function main(){
    await mongoose.connect('mongodb://127.0.0.1:27017/youtube');
@@ -42,6 +46,28 @@ app.get("/home/upload",(req,res)=>{
 app.post("/home",async(req,res)=>{
     let newVideo= new Video(req.body.new);
     await newVideo.save().then((res)=>{console.log(res)});
+    res.redirect("/home");
+})
+
+//Edit route
+app.get("/home/show/edit/:id",async(req,res)=>{
+    let {id}= req.params;
+   let videoDetails= await Video.findById(id);
+    res.render("edit.ejs",{videoDetails});
+})
+
+app.put("/home/show/:id",async(req,res)=>{
+    let {id}= req.params;
+    let updated=await Video.findByIdAndUpdate(id,{...req.body.edit});
+    console.log(updated);
+    res.redirect("/home");
+})
+
+//Destroy Route
+app.delete("/home/show/:id",async(req,res)=>{
+    let {id}= req.params;
+    let deletedVideo= await Video.findByIdAndDelete(id);
+    console.log(deletedVideo);
     res.redirect("/home");
 })
 
