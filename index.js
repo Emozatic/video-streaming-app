@@ -11,6 +11,7 @@ app.engine("ejs",ejsMate);
 app.set("views",path.join(__dirname,"/views"));
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
+app.use(express.static(path.join(__dirname,"/public")));
 
 async function main(){
    await mongoose.connect('mongodb://127.0.0.1:27017/youtube');
@@ -29,47 +30,51 @@ app.get("/home",async(req,res)=>{
     res.render("home.ejs",{allVideos});
 });
 
+//new route
+app.get("/home/new",(req,res)=>{
+    res.render("new.ejs");
+})
+
 //show route
-app.get("/home/show/:id",async(req,res)=>{
+app.get("/home/:id",async(req,res)=>{
     let{id}=req.params;
     let allVideos=await Video.find({});
     let showVideo= await Video.findById(id);
     res.render("show.ejs",{showVideo, allVideos});
 })
 
-//new route
-app.get("/home/upload",(req,res)=>{
-    res.render("new.ejs");
-})
+
 
 //post route for upload
 app.post("/home",async(req,res)=>{
     let newVideo= new Video(req.body.new);
     await newVideo.save().then((res)=>{console.log(res)});
     res.redirect("/home");
-})
+});
 
 //Edit route
-app.get("/home/show/edit/:id",async(req,res)=>{
+app.get("/home/edit/:id",async(req,res)=>{
     let {id}= req.params;
    let videoDetails= await Video.findById(id);
     res.render("edit.ejs",{videoDetails});
-})
+});
 
-app.put("/home/show/:id",async(req,res)=>{
+app.put("/home/:id",async(req,res)=>{
     let {id}= req.params;
     let updated=await Video.findByIdAndUpdate(id,{...req.body.edit});
     console.log(updated);
     res.redirect("/home");
-})
+});
 
 //Destroy Route
-app.delete("/home/show/:id",async(req,res)=>{
+app.delete("/home/:id",async(req,res)=>{
     let {id}= req.params;
     let deletedVideo= await Video.findByIdAndDelete(id);
     console.log(deletedVideo);
     res.redirect("/home");
-})
+});
+
+
 
 const port= 8000;
 app.listen(port,()=>{

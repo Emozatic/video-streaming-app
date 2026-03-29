@@ -1,10 +1,11 @@
 <% layout("/layouts/boilerplate") %>
     <h1>HOME</h1>
     <%for(let video of allVideos){%>
-        <p><%=video.title%></p>
+        
         <img src="<%=video.thumbnail%>" alt="thumbnails">
-        <form action="/home/show/<%=video._id%>" method="GET">
-            <button>Show</button>
+        <p class="mt-2"><%=video.title%></p>
+        <form action="/home/<%=video._id%>" method="GET">
+            <button class="mb-3">Show</button>
         </form>
 
         <%}%>

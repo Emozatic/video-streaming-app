@@ -5,18 +5,18 @@
     </video>
 <!-- 
     <iframe src="<%=showVideo.video.url.replace('watch?v=','embed/')%>" frameborder="0" height="350" width="600" allowfullscreen></iframe> -->
-    <p><%=showVideo.title%></p>
-    <form action="/home/show/edit/<%=showVideo._id%>">
-                <button>Edit</button>
+    <p><b><%=showVideo.title%></b></p>
+    <form action="/home/edit/<%=showVideo._id%>">
+                <button class="mb-2">Edit</button>
             </form>
-            <form action="/home/show/<%=showVideo._id%>?_method=DELETE" method="POST">
-                <button>Delete</button>
+            <form action="/home/<%=showVideo._id%>?_method=DELETE" method="POST">
+                <button class="mb-2">Delete</button>
             </form>
 
-    <div>
+    <div class="mt-4">
         <h4>All Videos</h4>
         <%for(let video of allVideos){%>
-            <a href="/home/show/<%=video._id%>">
+            <a href="/home/<%=video._id%>">
             <img src="<%=video.thumbnail%>" alt="videoThumbnail">
             <p><%=video.title%></p>
             </a>

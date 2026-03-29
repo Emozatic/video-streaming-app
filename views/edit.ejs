@@ -1,5 +1,5 @@
 <% layout("/layouts/boilerplate") %>
-    <form action="/home/show/<%=videoDetails._id%>?_method=PUT" method="POST">
+    <form action="/home/<%=videoDetails._id%>?_method=PUT" method="POST">
     <h1>Edit Your Video's Details</h1>
     <label for="title"></label>
     <input type="text" value="<%=videoDetails.title%>" name="edit[title]"> 
