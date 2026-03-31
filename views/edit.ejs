@@ -1,14 +1,23 @@
 <% layout("/layouts/boilerplate") %>
-    <form action="/home/<%=videoDetails._id%>?_method=PUT" method="POST">
+    <form action="/home/<%=videoDetails._id%>?_method=PUT" method="POST" class="needs-validation" novalidate>
     <h1>Edit Your Video's Details</h1>
     <label for="title"></label>
-    <input type="text" value="<%=videoDetails.title%>" name="edit[title]"> 
+    <input type="text" value="<%=videoDetails.title%>" name="edit[title]" class="form-control" required>
+    <div class="invalid-feedback">
+      Please provide a valid title for your video.
+    </div>
 
      <label for="description"></label>
-    <input type="text" value="<%=videoDetails.description%>" name="edit[description]"> 
+    <input type="text" value="<%=videoDetails.description%>" name="edit[description]" class="form-control" required>
+    <div class="invalid-feedback">
+      Please provide a valid description for your video.
+    </div>
 
      <label for="edit[thumbnail]"></label>
-    <input type="url" name="edit[thubnail]"value="<%=videoDetails.thumbnail%>">
+    <input type="url" name="edit[thumbnail]" value="<%=videoDetails.thumbnail%>" class="form-control" required>
+    <div class="invalid-feedback">
+      Please provide a valid URL for your thumbnail.
+    </div>
 
-    <button>Edit</button>
+    <button type="submit">Edit</button>
     </form>

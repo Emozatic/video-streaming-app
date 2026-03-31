@@ -1,11 +1,14 @@
 <% layout("/layouts/boilerplate") %>
     <h1>Upload Your Video</h1>
-    <form action="/home" method="POST">
+    <form action="/home" method="POST" class="needs-validation" novalidate>
 
         
     <div class="mb-3">
   <label for="url" class="form-label">Enter your video's URL</label>
-   <input type="url" name="new[video][url]" id="url" placeholder="enter your video's URL" required class="form-control">
+   <input type="url" name="new[video][url]" id="url" placeholder="enter your video's URL" class="form-control" required>
+   <div class="invalid-feedback">
+      Please provide a valid URL for your video.
+    </div>
 </div>
 
 
@@ -13,18 +16,27 @@
   <label for="title" class="form-label">Enter your title</label>
   
         <input type="text" name="new[title]" id="title" placeholder="enter your title" class="form-control" required>
+        <div class="invalid-feedback">
+      Please provide a valid title for your video.
+    </div>
 </div>
        
 <div class="mb-3">
   <label for="description" class="form-label">Enter your description</label>
   <input class="form-control" type="text" id="description" name="new[description]" placeholder="enter your description" required>
+  <div class="invalid-feedback">
+      Please provide a valid description for your video.
+    </div>
 </div>
 
 <div class="mb-3">
   <label for="thumbnail" class="form-label">Enter thumbnail's URL</label>
   <input type="url" name="new[thumbnail]" id="thumbnail" placeholder="enter your thumbnail URL" class="form-control" required>
+  <div class="invalid-feedback">
+      Please provide a valid URL for your thumbnail.
+    </div>
 </div>
 
        
-        <button>Upload</button>
+        <button type="submit">Upload</button>
     </form>
