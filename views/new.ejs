@@ -1,9 +1,30 @@
 <% layout("/layouts/boilerplate") %>
     <h1>Upload Your Video</h1>
     <form action="/home" method="POST">
-        <input type="url" name="new[video][url]" id="url" placeholder="enter your video's URL">
-        <input type="text" name="new[title]" id="title" placeholder="enter your title">
-        <input type="text" name="new[description]" id="description" placeholder="enter your description">
-        <input type="url" name="new[thumbnail]" id="thumbnail" placeholder="enter your thumbnail URL">
+
+        
+    <div class="mb-3">
+  <label for="url" class="form-label">Enter your video's URL</label>
+   <input type="url" name="new[video][url]" id="url" placeholder="enter your video's URL" required class="form-control">
+</div>
+
+
+<div class="mb-3">
+  <label for="title" class="form-label">Enter your title</label>
+  
+        <input type="text" name="new[title]" id="title" placeholder="enter your title" class="form-control" required>
+</div>
+       
+<div class="mb-3">
+  <label for="description" class="form-label">Enter your description</label>
+  <input class="form-control" type="text" id="description" name="new[description]" placeholder="enter your description" required>
+</div>
+
+<div class="mb-3">
+  <label for="thumbnail" class="form-label">Enter thumbnail's URL</label>
+  <input type="url" name="new[thumbnail]" id="thumbnail" placeholder="enter your thumbnail URL" class="form-control" required>
+</div>
+
+       
         <button>Upload</button>
     </form>

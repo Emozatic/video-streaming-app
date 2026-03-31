@@ -5,13 +5,14 @@ const path= require("path");
 const Video= require("./models/videos");
 const methodOverride=  require("method-override")
 const ejsMate= require("ejs-mate");
+const ExpressError= require("./middleware/ExpressError");
 
 app.set("view engine","ejs");
 app.engine("ejs",ejsMate);
 app.set("views",path.join(__dirname,"/views"));
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
-app.use(express.static(path.join(__dirname,"/public")));
+app.use(express.static(path.join(__dirname,"public")));
 
 async function main(){
    await mongoose.connect('mongodb://127.0.0.1:27017/youtube');
@@ -74,7 +75,12 @@ app.delete("/home/:id",async(req,res)=>{
     res.redirect("/home");
 });
 
-
+//Errror handling middleware
+app.use((err,req,res,next)=>{
+    console.log(err);
+    let{status=500,message}= err;
+    res.status(status).send(message);
+})
 
 const port= 8000;
 app.listen(port,()=>{
