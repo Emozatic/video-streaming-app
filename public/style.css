@@ -68,8 +68,6 @@ body{
     transform: scale(1.00);
     transition: all 0.3s ease-in-out;
 }
-
-
 .listing-card{
     border: none !important;
     margin-bottom:2rem;
@@ -106,4 +104,14 @@ body{
 .btn{
     border: none !important;
      background-color: red !important;
+}
+
+/* //for error message */
+
+.err{
+    height: 100px !important;
+    width: 100% !important;
+    background-color: rgb(245, 130, 130) !important;
+    color: red !important;
+    font-size: 40px !important;
 }

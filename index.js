@@ -5,7 +5,10 @@ const path= require("path");
 const Video= require("./models/videos");
 const methodOverride=  require("method-override")
 const ejsMate= require("ejs-mate");
-const ExpressError= require("./middleware/ExpressError");
+const ExpressError= require("./utils/ExpressError");
+const asyncWrap= require("./utils/wrapAsync");
+const { videoSchema }= require("./schema");
+const { validateListing }= require("./utils/validateListing");
 
 app.set("view engine","ejs");
 app.engine("ejs",ejsMate);
@@ -23,11 +26,9 @@ main()
 .then(()=>{console.log("connected to db")})
 .catch((err)=>{console.log(err)});
 
-function asyncWrap(fn){
-    return function(req,res,next){
-        fn(req,res,next).catch(err=>next(err));
-    }
-}
+
+
+
 
 //index route
 app.get("/home",asyncWrap(async(req,res)=>{
@@ -49,7 +50,12 @@ app.get("/home/:id",asyncWrap(async(req,res)=>{
 }));
 
 //post route for upload
-app.post("/home",asyncWrap(async(req,res)=>{
+app.post("/home",validateListing,asyncWrap(async(req,res)=>{
+    let result= videoSchema.validate(req.body.new);
+    if(result.error){
+        let msg= result.error.details.map(el=>el.message).join(",");
+        throw new ExpressError(msg,400);
+    };
     let newVideo= new Video(req.body.new);
     await newVideo.save().then((res)=>{console.log(res)});
     res.redirect("/home");
@@ -65,7 +71,7 @@ app.get("/home/edit/:id",asyncWrap(async(req,res)=>{
     res.render("edit.ejs",{videoDetails});
 }));
 
-app.put("/home/:id",asyncWrap(async(req,res)=>{
+app.put("/home/:id",validateListing,asyncWrap(async(req,res)=>{
     let {id}= req.params;
     let updated=await Video.findByIdAndUpdate(id,{...req.body.edit});
     console.log(updated);
@@ -84,7 +90,7 @@ app.delete("/home/:id",asyncWrap(async(req,res)=>{
 app.use((err,req,res,next)=>{
     console.log(err);
     let{status=500,message}= err;
-    res.status(status).send(message);
+    res.render("error.ejs",{err});
 })
 
 const port= 8000;
