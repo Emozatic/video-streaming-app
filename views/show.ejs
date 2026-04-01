@@ -36,6 +36,10 @@
              <div class="card col-5 mb-3">
                 <h5 class="card-title">Lucky</h5>
                 <p class="card-text"><%=comment.comment%></p>
+                <form action="/home/<%=showVideo._id%>/comments/<%=comment._id%>?_method=DELETE" method="POST">
+                    <button class="btn btn-danger">Delete</button>
+                </form>
+
               
              </div>
               <% } %>

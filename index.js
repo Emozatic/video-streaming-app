@@ -113,6 +113,16 @@ app.post("/home/:id/comments",validComment,asyncWrap(async(req,res)=>{
     res.redirect(`/home/${id}`);
 }));
 
+//Delete comment route
+
+app.delete("/home/:id/comments/:commentId",asyncWrap(async(req,res)=>{
+    let {id, commentId}= req.params;
+    let video= await Video.findById(id);
+    video.comments.pull({_id: commentId});
+    await video.save();
+    res.redirect(`/home/${id}`);
+}));
+
 //Errror handling middleware
 app.use((err,req,res,next)=>{
     console.log(err);
