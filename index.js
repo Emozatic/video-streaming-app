@@ -7,8 +7,9 @@ const methodOverride=  require("method-override")
 const ejsMate= require("ejs-mate");
 const ExpressError= require("./utils/ExpressError");
 const asyncWrap= require("./utils/wrapAsync");
-const { videoSchema }= require("./schema");
-const { validateListing }= require("./utils/validateListing");
+const {videoSchema}= require("./schema");
+const Comment= require("./models/comments");
+const {commentSchema}= require("./schema");
 
 app.set("view engine","ejs");
 app.engine("ejs",ejsMate);
@@ -27,7 +28,14 @@ main()
 .catch((err)=>{console.log(err)});
 
 
-
+const validateListing= (req,res,next)=>{
+    let result= videoSchema.validate(req.body.new);
+    if(result.error){
+        let msg= result.error.details.map(el=>el.message).join(",");
+        throw new ExpressError(msg,400);
+    }
+    next();
+};
 
 
 //index route
@@ -45,17 +53,13 @@ app.get("/home/new",asyncWrap(async(req,res)=>{
 app.get("/home/:id",asyncWrap(async(req,res)=>{
     let{id}=req.params;
     let allVideos=await Video.find({});
-    let showVideo= await Video.findById(id);
+    let showVideo= await Video.findById(id).populate("comments");
+    console.log(showVideo.comments);
     res.render("show.ejs",{showVideo, allVideos});
 }));
 
 //post route for upload
 app.post("/home",validateListing,asyncWrap(async(req,res)=>{
-    let result= videoSchema.validate(req.body.new);
-    if(result.error){
-        let msg= result.error.details.map(el=>el.message).join(",");
-        throw new ExpressError(msg,400);
-    };
     let newVideo= new Video(req.body.new);
     await newVideo.save().then((res)=>{console.log(res)});
     res.redirect("/home");
@@ -84,6 +88,29 @@ app.delete("/home/:id",asyncWrap(async(req,res)=>{
     let deletedVideo= await Video.findByIdAndDelete(id);
     console.log(deletedVideo);
     res.redirect("/home");
+}));
+
+//function for comment validation
+const validComment= (req,res,next)=>{
+    let{err}= commentSchema.validate(req.body);
+    if(err){
+        let msg= err.details.map(el=>el.message).join(",");
+        throw new ExpressError(msg,400);
+    }
+    else{
+        next()
+    }
+}
+
+//Commet route
+app.post("/home/:id/comments",validComment,asyncWrap(async(req,res)=>{    
+    let {id}= req.params;
+    let video= await Video.findById(id);
+    let newComment= new Comment({comment: req.body.comments});
+    video.comments.push(newComment);
+    await newComment.save();
+    await video.save();
+    res.redirect(`/home/${id}`);
 }));
 
 //Errror handling middleware

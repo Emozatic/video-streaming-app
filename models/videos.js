@@ -1,6 +1,6 @@
 const mongoose= require("mongoose");
 const Schema= mongoose.Schema;
-
+const Comment= require("./comments")
 let videoSchema= new Schema({
     title:{
         type:String,
@@ -14,6 +14,10 @@ let videoSchema= new Schema({
     video:{
         url:String,
     },
+    comments:[{
+        type:Schema.Types.ObjectId,
+        ref:"Comment"
+    }]
     
 },{timestamps:true});
 

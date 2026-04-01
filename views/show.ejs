@@ -14,6 +14,37 @@
                 <button class="mb-2">Delete</button>
             </form>
 
+
+            <!-- comments -->
+             <div class="col-5 mb-3">
+                <h4>Comments</h4>
+                <hr>
+                <form action="/home/<%=showVideo._id%>/comments" method="POST" class="needs-validation" novalidate>
+                    <div class="mb-3 mt-3">
+                        <label for="comments">Add a comment:</label>
+                        <textarea class="form-control" id="comments" name="comments" rows="3" required></textarea>
+                    </div>
+                    <button type="submit">Submit</button>
+                </form>
+             </div>
+
+             <!-- show comments -->
+              <hr>
+              <p>All Comments</p>
+              <!-- <div class="row"> -->
+                <% for(let comment of showVideo.comments){%>
+             <div class="card col-5 mb-3">
+                <h5 class="card-title">Lucky</h5>
+                <p class="card-text"><%=comment.comment%></p>
+              
+             </div>
+              <% } %>
+              <!-- </div> -->
+             
+
+              
+
+
     <div class="mt-4">
         <h4>All Videos</h4>
         <%for(let video of allVideos){%>

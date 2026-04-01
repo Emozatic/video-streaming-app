@@ -1,8 +1,0 @@
-module.exports.validateListing= (req,res,next)=>{
-    let result= videoSchema.validate(req.body.new);
-    if(result.error){
-        let msg= result.error.details.map(el=>el.message).join(",");
-        throw new ExpressError(msg,400);
-    }
-    next();
-};
