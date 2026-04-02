@@ -21,4 +21,13 @@ let videoSchema= new Schema({
     
 },{timestamps:true});
 
+//mongoose post middleware for comment deletions
+videoSchema.post("findOneAndDelete",async(post)=>{  
+    console.log("Post Triggered");
+    if(post){
+        let res= await Comment.deleteMany({_id:{$in:post.comments}});
+        console.log(res);
+    }
+})
+
 module.exports= mongoose.model("Video",videoSchema);

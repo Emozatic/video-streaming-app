@@ -23,6 +23,7 @@ const postSchema= new Schema({
     }
 })
 
+
 const User= mongoose.model("User",userSchema);
 const Post= mongoose.model("Post",postSchema);
 

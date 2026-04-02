@@ -14,6 +14,8 @@ const orderSchema= new Schema({
     price:Number,
 })
 
+
+
 const Order= mongoose.model("Order",orderSchema);
 
 // let addOrders= async()=>{
@@ -31,6 +33,17 @@ const userSchema= new Schema({
         type:Schema.Types.ObjectId,
         ref:"Order"
     }]
+})
+//pre middleware
+// userSchema.pre("findOneAndDelete",async()=>{
+//     console.log("pre middleware");
+// })
+
+userSchema.post("findOneAndDelete",async(user)=>{
+    if(user.orders.length){
+      let res=  await Order.deleteMany({_id: {$in:user.orders}})
+        console.log(res);
+    }
 })
 
 const User= mongoose.model("User", userSchema);
@@ -51,8 +64,34 @@ const User= mongoose.model("User", userSchema);
 
 // addCustomer();
 
-const findUser= async()=>{
-    let find=await User.find({}).populate("orders");
-    console.log(find);
+// const findUser= async()=>{
+//     let find=await User.find({}).populate("orders");
+//     console.log(find);
+// }
+// findUser();
+
+let addCustomer= async ()=>{
+    let newUser= new User({
+        name:"Lucky"
+    })
+    let order= new Order({item:"Kurkure", price:20});
+   
+   await order.save();
+     newUser.orders.push(order);
+    await newUser.save().then((res)=>{console.log(res)});
 }
-findUser();
+//addCustomer();
+
+let showOrders= async()=>{
+    let order= await User.findById("69cdea2a5e3f0f67bf29c06c").populate("orders");
+    console.log(order);
+}
+
+//showOrders();
+
+let delCustomer= async()=>{
+    let del= await User.findByIdAndDelete("69cdf002c64ee8994718e713");
+    console.log(del);
+}
+
+delCustomer();
