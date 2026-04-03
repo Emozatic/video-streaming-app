@@ -11,6 +11,7 @@ const {videoSchema}= require("./schema");
 const Comment= require("./models/comments");
 const {commentSchema}= require("./schema");
 const session= require("express-session");
+const flash= require("connect-flash");
 
 app.set("view engine","ejs");
 app.engine("ejs",ejsMate);
@@ -32,6 +33,13 @@ const sessionOption={
 }
 
 app.use(session(sessionOption));
+app.use(flash());
+
+app.use((req,res,next)=>{
+    res.locals.success= req.flash("success");
+    res.locals.error= req.flash("error");
+    next();
+})
 
 async function main(){
    await mongoose.connect('mongodb://127.0.0.1:27017/youtube');
@@ -67,9 +75,16 @@ app.get("/home/new",asyncWrap(async(req,res)=>{
 //show route
 app.get("/home/:id",asyncWrap(async(req,res)=>{
     let{id}=req.params;
+    if(!mongoose.Types.ObjectId.isValid(id)){
+        req.flash("error","Video not found");
+        return res.redirect("/home")
+    }
     let allVideos=await Video.find({});
     let showVideo= await Video.findById(id).populate("comments");
-    console.log(showVideo.comments);
+    if(!showVideo){
+        req.flash("error","Video not found");
+        return res.redirect("/home");
+    }
     res.render("show.ejs",{showVideo, allVideos});
 }));
 
@@ -77,6 +92,7 @@ app.get("/home/:id",asyncWrap(async(req,res)=>{
 app.post("/home",validateListing,asyncWrap(async(req,res)=>{
     let newVideo= new Video(req.body.new);
     await newVideo.save().then((res)=>{console.log(res)});
+    req.flash("success","New Video Uploaded");
     res.redirect("/home");
 }));
 
@@ -94,6 +110,7 @@ app.put("/home/:id",validateListing,asyncWrap(async(req,res)=>{
     let {id}= req.params;
     let updated=await Video.findByIdAndUpdate(id,{...req.body.edit});
     console.log(updated);
+    req.flash("success","Video Updated");
     res.redirect("/home");
 }));
 
@@ -102,6 +119,7 @@ app.delete("/home/:id",asyncWrap(async(req,res)=>{
     let {id}= req.params;
     let deletedVideo= await Video.findByIdAndDelete(id);
     console.log(deletedVideo);
+    req.flash("success","Video Deleted");
     res.redirect("/home");
 }));
 
@@ -125,6 +143,7 @@ app.post("/home/:id/comments",validComment,asyncWrap(async(req,res)=>{
     video.comments.push(newComment);
     await newComment.save();
     await video.save();
+    req.flash("success","Comment Added");
     res.redirect(`/home/${id}`);
 }));
 
@@ -135,6 +154,7 @@ app.delete("/home/:id/comments/:commentId",asyncWrap(async(req,res)=>{
     let video= await Video.findById(id);
     video.comments.pull({_id: commentId});
     await video.save();
+    req.flash("success","Comment Deleted");
     res.redirect(`/home/${id}`);
 }));
 
