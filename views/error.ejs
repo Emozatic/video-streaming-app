@@ -1,8 +1,11 @@
 <%- layout("/layouts/boilerplate") %>
-<div class="row">
-    <div class="col-12">
-        <div class="err">
-        <h1 class="text-center">Error: <%=err.message%></h1>
+<div class="error-container">
+    <div class="row">
+        <div class="col-12">
+            <div class="err">
+                <h1 class="text-center error-text">Error: <%=err.message%></h1>
+                <div class="error-icon">⚠️</div>
+            </div>
         </div>
     </div>
-</div>
+</div>      
