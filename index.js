@@ -12,6 +12,10 @@ const Comment= require("./models/comments");
 const {commentSchema}= require("./schema");
 const session= require("express-session");
 const flash= require("connect-flash");
+const localStreategy =require("passport-local");
+const passposrt= require("passport");
+const User= require("./models/user");
+const passport = require("passport");
 
 app.set("view engine","ejs");
 app.engine("ejs",ejsMate);
@@ -19,6 +23,16 @@ app.set("views",path.join(__dirname,"/views"));
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname,"public")));
+
+async function main(){
+   await mongoose.connect('mongodb://127.0.0.1:27017/youtube');
+
+}
+
+main()
+.then(()=>{console.log("connected to db")})
+.catch((err)=>{console.log(err)});
+
 
 //session option
 const sessionOption={
@@ -41,14 +55,13 @@ app.use((req,res,next)=>{
     next();
 })
 
-async function main(){
-   await mongoose.connect('mongodb://127.0.0.1:27017/youtube');
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStreategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
-}
 
-main()
-.then(()=>{console.log("connected to db")})
-.catch((err)=>{console.log(err)});
 
 
 const validateListing= (req,res,next)=>{
@@ -59,6 +72,44 @@ const validateListing= (req,res,next)=>{
     }
     next();
 };
+
+//demo user
+// app.get("/demoUser",async(req,res)=>{
+//     let fakeUser= new User({
+//         email:"lk@gmail.com",
+//         username:"lucky"
+//     })
+//     let registeredUser= await User.register(fakeUser,"lucky123");
+//     res.send(registeredUser);   
+// })
+
+//sigup route
+app.get("/signup",(req,res)=>{
+    res.render("signup.ejs");
+});
+
+app.post("/signup",asyncWrap(async(req,res)=>{
+    try{
+        let {email, username, password}= req.body;
+    const registeredUser= await User.register(new User({email,username}),password);
+    console.log(registeredUser);
+    req.flash("success", "new user registered");
+    res.redirect("/home");
+    }catch(err){
+    req.flash("error",err.message);
+    res.redirect("/signup")
+    }
+}));
+
+//login route
+app.get("/login",(req,res)=>{
+    res.render("login.ejs");
+});
+
+app.post("/login",passport.authenticate("local",{failureFlash:true}),asyncWrap(async(req,res)=>{
+    req.flash("success","welcome back!");
+    res.redirect("/home");
+}));
 
 
 //index route
