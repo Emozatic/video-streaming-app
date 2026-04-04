@@ -13,9 +13,10 @@ const {commentSchema}= require("./schema");
 const session= require("express-session");
 const flash= require("connect-flash");
 const localStreategy =require("passport-local");
-const passposrt= require("passport");
 const User= require("./models/user");
 const passport = require("passport");
+const {isloggedIn}= require("./middleware");
+const { register } = require("module");
 
 app.set("view engine","ejs");
 app.engine("ejs",ejsMate);
@@ -49,19 +50,20 @@ const sessionOption={
 app.use(session(sessionOption));
 app.use(flash());
 
-app.use((req,res,next)=>{
-    res.locals.success= req.flash("success");
-    res.locals.error= req.flash("error");
-    next();
-})
 
-app.use(passport.initialize());
-app.use(passport.session());
-passport.use(new localStreategy(User.authenticate()));
+
+app.use(passport.initialize());//initialize passport
+app.use(passport.session());//initialize session for users
+passport.use(new localStreategy(User.authenticate()));//help to authenticate user
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-
+app.use((req,res,next)=>{
+    res.locals.success= req.flash("success");
+    res.locals.error= req.flash("error");
+    res.locals.currUser= req.user;
+    next();
+})
 
 
 const validateListing= (req,res,next)=>{
@@ -93,9 +95,16 @@ app.post("/signup",asyncWrap(async(req,res)=>{
         let {email, username, password}= req.body;
     const registeredUser= await User.register(new User({email,username}),password);
     console.log(registeredUser);
-    req.flash("success", "new user registered");
+    req.login(registeredUser,(err)=>{
+        if(err){
+            return next(err);
+        }
+        req.flash("success", "new user registered");
     res.redirect("/home");
-    }catch(err){
+    })
+    
+    }
+    catch(err){
     req.flash("error",err.message);
     res.redirect("/signup")
     }
@@ -111,6 +120,17 @@ app.post("/login",passport.authenticate("local",{failureFlash:true}),asyncWrap(a
     res.redirect("/home");
 }));
 
+//logout route
+app.get("/logout", (req,res)=>{
+    req.logout((err)=>{
+        if(err){
+            return next(err);
+        }
+        req.flash("success","you are logged-out")
+        res.redirect("/home")
+    })
+})
+
 
 //index route
 app.get("/home",asyncWrap(async(req,res)=>{
@@ -119,12 +139,12 @@ app.get("/home",asyncWrap(async(req,res)=>{
 }));
 
 //new route
-app.get("/home/new",asyncWrap(async(req,res)=>{
+app.get("/home/new",isloggedIn,asyncWrap(async(req,res)=>{
     res.render("new.ejs");
 }));
 
 //show route
-app.get("/home/:id",asyncWrap(async(req,res)=>{
+app.get("/home/:id",isloggedIn,asyncWrap(async(req,res)=>{
     let{id}=req.params;
     if(!mongoose.Types.ObjectId.isValid(id)){
         req.flash("error","Video not found");
@@ -140,7 +160,7 @@ app.get("/home/:id",asyncWrap(async(req,res)=>{
 }));
 
 //post route for upload
-app.post("/home",validateListing,asyncWrap(async(req,res)=>{
+app.post("/home",isloggedIn,validateListing,asyncWrap(async(req,res)=>{
     let newVideo= new Video(req.body.new);
     await newVideo.save().then((res)=>{console.log(res)});
     req.flash("success","New Video Uploaded");
@@ -148,7 +168,7 @@ app.post("/home",validateListing,asyncWrap(async(req,res)=>{
 }));
 
 //Edit route
-app.get("/home/edit/:id",asyncWrap(async(req,res)=>{
+app.get("/home/edit/:id",isloggedIn,asyncWrap(async(req,res)=>{
     let {id}= req.params;
    let videoDetails= await Video.findById(id);
    if(!videoDetails){
@@ -166,7 +186,7 @@ app.put("/home/:id",validateListing,asyncWrap(async(req,res)=>{
 }));
 
 //Destroy Route
-app.delete("/home/:id",asyncWrap(async(req,res)=>{
+app.delete("/home/:id",isloggedIn,asyncWrap(async(req,res)=>{
     let {id}= req.params;
     let deletedVideo= await Video.findByIdAndDelete(id);
     console.log(deletedVideo);
