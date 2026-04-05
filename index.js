@@ -19,6 +19,7 @@ const {isloggedIn}= require("./middleware");
 const { register } = require("module");
 const {saveRedirectUrl}=require("./middleware")
 const {isOwner}= require("./middleware");
+const {isCommentOwner}= require("./middleware");
 
 app.set("view engine","ejs");
 app.engine("ejs",ejsMate);
@@ -218,7 +219,7 @@ app.post("/home/:id/comments",isloggedIn,validComment,asyncWrap(async(req,res)=>
 
 //Delete comment route
 
-app.delete("/home/:id/comments/:commentId",asyncWrap(async(req,res)=>{
+app.delete("/home/:id/comments/:commentId",isloggedIn,isCommentOwner,asyncWrap(async(req,res)=>{
     let {id, commentId}= req.params;
     let video= await Video.findById(id);
     video.comments.pull({_id: commentId});
