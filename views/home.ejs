@@ -1,22 +1,18 @@
 <% layout("/layouts/boilerplate") %>
 <div class="container-fluid px-3">
-    <div class="row g-3">
-    <%for(let video of allVideos){%>
-        
-            
-        <div class="card col-12 col-md-6 col-lg-4 col-xl-4 mb-4">
-            <a href="/home/<%=video._id%>">
-  
-  <div class="card h-100">
-    <img src="<%=video.thumbnail%>" class="card-img-top card" alt="thumbnails">
-        <!-- <img src="" alt="thumbnails"> -->
-        <div class="card-body">
-        <h5 class="card-title"><%=video.title%></h5>
-        </div>
-        </div>
-        </a>
-</div>
-
-<%}%>
-</div>
+    <div class="video-grid">
+        <% for (let video of allVideos) { %>
+            <a href="/home/<%= video._id %>" class="video-link">
+                <article class="video-card">
+                    <div class="video-card-media">
+                        <img src="<%= video.thumbnail %>" class="card-img-top" alt="<%= video.title %> thumbnail">
+                        <span class="video-badge">Watch</span>
+                    </div>
+                    <div class="video-card-details">
+                        <h5 class="card-title"><%= video.title %></h5>
+                    </div>
+                </article>
+            </a>
+        <% } %>
+    </div>
 </div>

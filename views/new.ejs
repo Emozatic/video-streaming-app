@@ -1,46 +1,112 @@
 <% layout("/layouts/boilerplate") %>
-    <h1>Upload Your Video</h1>
-    <form action="/home" method="POST" class="needs-validation" novalidate>
 
-        
-    <div class="mb-3">
-  <label for="url" class="form-label">Enter your video's URL</label>
-   <input type="url" name="new[video][url]" id="url" placeholder="enter your video's URL" class="form-control" required>
-   <div class="invalid-feedback">
-      Please provide a valid URL for your video.
+<div class="upload-page">
+    <div class="upload-container">
+        <div class="upload-header">
+            <h1>Upload Your Video</h1>
+            <p>Share your content with the world. Fill in the details below to get started.</p>
+        </div>
+
+        <form action="/home" method="POST" class="needs-validation upload-form" novalidate enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="url" class="form-label">
+                            <span class="label-icon">🔗</span>
+                            Video URL
+                        </label>
+                        <input type="url" name="new[video][url]" id="url" placeholder="Paste your video URL here" class="form-control signup-input" required>
+                        <div class="invalid-feedback">Please provide a valid video URL.</div>
+                        <p class="input-hint">Supported: YouTube, Vimeo, and direct video links</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="title" class="form-label">
+                            <span class="label-icon">📝</span>
+                            Video Title
+                        </label>
+                        <input type="text" name="new[title]" id="title" placeholder="Enter an engaging title" class="form-control signup-input" required>
+                        <div class="invalid-feedback">Please provide a valid title.</div>
+                        <div class="valid-feedback">Looks good!</div>
+                        <p class="input-hint">Make it catchy and descriptive (max 100 characters)</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description" class="form-label">
+                            <span class="label-icon">📄</span>
+                            Description
+                        </label>
+                        <textarea class="form-control signup-input" type="text" id="description" name="new[description]" placeholder="Describe your video in detail..." rows="4" required></textarea>
+                        <div class="invalid-feedback">Please provide a valid description.</div>
+                        <div class="valid-feedback">Looks good!</div>
+                        <p class="input-hint">Tell viewers what your video is about</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="thumbnail" class="form-label">
+                            <span class="label-icon">🖼️</span>
+                            Thumbnail URL
+                        </label>
+                        <input type="file" name="new[thumbnail]" id="thumbnail" placeholder="Paste thumbnail image URL" class="form-control signup-input" required>
+                        <div class="invalid-feedback">Please provide a valid thumbnail URL.</div>
+                        <p class="input-hint">Use a high-quality image (16:9 aspect ratio recommended)</p>
+                    </div>
+                </div>
+
+                <aside class="preview-panel">
+                    <div class="preview-card">
+                        <h3 class="preview-title">Preview</h3>
+                        <div class="preview-content">
+                            <div class="thumbnail-preview">
+                                <img id="thumbnailPreview" src="https://via.placeholder.com/320x180?text=Your+Thumbnail" alt="Thumbnail preview">
+                                <div class="preview-overlay">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="preview-details">
+                                <h4 id="previewTitle" class="preview-video-title">Your Video Title Here</h4>
+                                <p id="previewDesc" class="preview-video-desc">Your description will appear here...</p>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="upload-btn">
+                    <span>🚀 Upload Video</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const titleInput = document.getElementById('title');
+        const descInput = document.getElementById('description');
+        const thumbnailInput = document.getElementById('thumbnail');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewDesc = document.getElementById('previewDesc');
+        const previewThumb = document.getElementById('thumbnailPreview');
 
-<div class="mb-3">
-  <label for="title" class="form-label">Enter your title</label>
-  
-        <input type="text" name="new[title]" id="title" placeholder="enter your title" class="form-control" required>
-        <div class="invalid-feedback">
-      Please provide a valid title for your video.
-    </div>
-    <div class="valid-feedback">
-      Looks Good
-    </div>
-</div>
-       
-<div class="mb-3">
-  <label for="description" class="form-label">Enter your description</label>
-  <input class="form-control" type="text" id="description" name="new[description]" placeholder="enter your description" required>
-  <div class="invalid-feedback">
-      Please provide a valid description for your video.
-    </div>
-    <div class="valid-feedback">Looks Good</div>
-</div>
+        titleInput.addEventListener('input', function() {
+            previewTitle.textContent = this.value || 'Your Video Title Here';
+        });
 
-<div class="mb-3">
-  <label for="thumbnail" class="form-label">Enter thumbnail's URL</label>
-  <input type="url" name="new[thumbnail]" id="thumbnail" placeholder="enter your thumbnail URL" class="form-control" required>
-  <div class="invalid-feedback">
-      Please provide a valid URL for your thumbnail.
-    </div>
-</div>
+        descInput.addEventListener('input', function() {
+            previewDesc.textContent = (this.value || 'Your description will appear here...').substring(0, 150);
+        });
 
-       
-        <button type="submit">Upload</button>
-    </form>
+        thumbnailInput.addEventListener('change', function() {
+            if (this.value) {
+                previewThumb.src = this.value;
+                previewThumb.onerror = function() {
+                    previewThumb.src = 'https://via.placeholder.com/320x180?text=Invalid+Image';
+                };
+            }
+        });
+    });
+</script>

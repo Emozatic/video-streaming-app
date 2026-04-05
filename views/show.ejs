@@ -1,70 +1,120 @@
 <% layout("/layouts/boilerplate") %>
 
-    <h1>Show</h1>
-    <video id="videoPlayer" controls width="600">
-        <source src="<%=showVideo.video.url.replace('watch?v=','embed/')%>">
-    </video>
-<!-- 
-    <iframe src="<%=showVideo.video.url.replace('watch?v=','embed/')%>" frameborder="0" height="350" width="600" allowfullscreen></iframe> -->
-    <p><b><%=showVideo.title%></b></p>
-    <form action="/home/edit/<%=showVideo._id%>">
-        <%if(currUser && currUser._id.equals(showVideo.owner._id)){%>
-                <button class="mb-2">Edit</button>
-            <%}%>
-            </form>
-            <form action="/home/<%=showVideo._id%>?_method=DELETE" method="POST">
-                <%if(currUser && currUser._id.equals(showVideo.owner._id)){%>
-                <button class="mb-2">
-                    Delete</button>
-                <%}%>
-            </form>
-
-
-            <!-- comments -->
-             <div class="col-5 mb-3">
-                <h4>Comments</h4>
-                <%if(currUser){%>
-                <hr>
-                <form action="/home/<%=showVideo._id%>/comments" method="POST" class="needs-validation" novalidate>
-                    <div class="mb-3 mt-3">
-                        <label for="comments">Add a comment:</label>
-                        <textarea class="form-control" id="comments" name="comments" rows="3" required></textarea>
+<div class="show-page">
+    <div class="show-layout">
+        <section class="player-panel">
+            <div class="player-card">
+                <div class="video-top">
+                    <div>
+                        <h1 class="video-title"><%= showVideo.title %></h1>
+                        <p class="video-meta">Uploaded by <strong><%= showVideo.owner.username %></strong></p>
                     </div>
-                    <button type="submit">Submit</button>
-                </form>
-                <%}%>
-             </div>
+                    <div class="video-actions">
+                        <% if (currUser && currUser._id.equals(showVideo.owner._id)) { %>
+                            <form action="/home/edit/<%= showVideo._id %>">
+                                <button class="action-btn">Edit</button>
+                            </form>
+                            <form action="/home/<%= showVideo._id %>?_method=DELETE" method="POST">
+                                <button class="action-btn danger">Delete</button>
+                            </form>
+                        <% } %>
+                    </div>
+                </div>
 
-             <!-- show comments -->
-              <hr>
-              <p>All Comments</p>
-              <!-- <div class="row"> -->
-                <% for(let comment of showVideo.comments){%>
-             <div class="card col-5 mb-3">
-                <h5 class="card-title"><%=comment.author.username%></h5>
-                <p class="card-text"><%=comment.comment%></p>
-                <form action="/home/<%=showVideo._id%>/comments/<%=comment._id%>?_method=DELETE" method="POST">
-                    <% if(currUser && currUser._id.equals(comment.author._id)){%>
-                    <button class="btn btn-danger">Delete</button>
-                    <%}%>
-                </form>
+                <div class="video-wrapper">
+                    <video id="videoPlayer" controls class="video-player">
+                        <source src="<%= showVideo.video.url.replace('watch?v=','embed/') %>">
+                    </video>
+                </div>
 
-              
-             </div>
-              <% } %>
-              <!-- </div> -->
-             
+                <button id="commentToggleBtn" class="comment-toggle-btn">
+                    <i class="fas fa-comments"></i>
+                    <span>Comments</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
 
-              
+                <div class="comments-section" id="commentsSection">
+                    <div class="comment-card">
+                        <div class="comment-card-header">
+                            <h4>Comments</h4>
+                            <p class="comment-note">Share your thoughts about this video.</p>
+                        </div>
+                    <% if (currUser) { %>
+                        <form action="/home/<%= showVideo._id %>/comments" method="POST" class="needs-validation comment-form" novalidate>
+                            <label for="comments">Add a comment</label>
+                            <textarea class="form-control signup-input" id="comments" name="comments" rows="4" required></textarea>
+                            <button type="submit" class="signup-btn">Submit</button>
+                        </form>
+                    <% } else { %>
+                        <p class="comment-login">🔒 Please log in to add a comment.</p>
+                    <% } %>
+                </div>
 
+                <div class="comments-list">
+                    <div class="comments-header">
+                        <h4>All Comments</h4>
+                        <span><%= showVideo.comments.length %> comments</span>
+                    </div>
+                    <% for (let comment of showVideo.comments) { %>
+                        <div class="comment-item">
+                            <div class="comment-author"><%= comment.author.username %></div>
+                            <p class="comment-text"><%= comment.comment %></p>
+                            <% if (currUser && currUser._id.equals(comment.author._id)) { %>
+                                <form action="/home/<%= showVideo._id %>/comments/<%= comment._id %>?_method=DELETE" method="POST" class="comment-delete-form">
+                                    <button class="action-btn danger small">Delete</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    <% } %>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <div class="mt-4">
-        <h4>All Videos</h4>
-        <%for(let video of allVideos){%>
-            <a href="/home/<%=video._id%>">
-            <img src="<%=video.thumbnail%>" alt="videoThumbnail">
-            <p><%=video.title%></p>
-            </a>
-            <%}%>
-        
+        <aside class="related-videos">
+            <div class="related-header">
+                <h4>More Videos</h4>
+                <p>Continue watching with trending picks.</p>
+            </div>
+            <div class="related-list">
+                <% for (let video of allVideos) { %>
+                    <a href="/home/<%= video._id %>" class="related-item">
+                        <img src="<%= video.thumbnail %>" alt="<%= video.title %> thumbnail">
+                        <div class="related-content">
+                            <p class="related-title"><%= video.title %></p>
+                        </div>
+                    </a>
+                <% } %>
+            </div>
+        </aside>
     </div>
+</div>
+
+<script>
+    // Comment toggle functionality for md/sm screens
+    const commentToggleBtn = document.getElementById('commentToggleBtn');
+    const commentsSection = document.getElementById('commentsSection');
+
+    if (commentToggleBtn) {
+        commentToggleBtn.addEventListener('click', function() {
+            commentsSection.classList.toggle('visible');
+            commentToggleBtn.classList.toggle('active');
+        });
+
+        // Check if screen is large enough to hide toggle
+        const updateToggleVisibility = () => {
+            if (window.innerWidth > 991) {
+                commentsSection.classList.add('visible');
+                commentToggleBtn.classList.add('active');
+                commentToggleBtn.style.display = 'none';
+            } else {
+                commentsSection.classList.remove('visible');
+                commentToggleBtn.classList.remove('active');
+                commentToggleBtn.style.display = 'flex';
+            }
+        };
+
+        window.addEventListener('resize', updateToggleVisibility);
+        updateToggleVisibility();
+    }
+</script>

@@ -1,59 +1,122 @@
 <% layout("/layouts/boilerplate") %>
+
+<div class="edit-page">
     <div class="edit-container">
-        <form action="/home/<%=videoDetails._id%>?_method=PUT" method="POST" class="needs-validation edit-form" novalidate>
-        <h1 class="edit-title">Edit Your Video's Details</h1>
-        <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" value="<%=videoDetails.title%>" name="edit[title]" class="form-control edit-input" required>
-            <div class="invalid-feedback">
-              Please provide a valid title for your video.
-            </div>
-            <div class="valid-feedback">
-              Looks Good
-            </div>
+        <div class="edit-header">
+            <h1>Edit Your Video</h1>
+            <p>Update your video's details to keep content fresh and engaging.</p>
         </div>
 
-        <div class="form-group">
-            <label for="description">Description</label>
-            <input type="text" value="<%=videoDetails.description%>" name="edit[description]" class="form-control edit-input" required>
-            <div class="invalid-feedback">
-              Please provide a valid description for your video.
-            </div>
-            <div class="valid-feedback">
-              Looks Good
-            </div>
-        </div>
+        <form action="/home/<%= videoDetails._id %>?_method=PUT" method="POST" class="needs-validation edit-form-modern" novalidate>
+            <div class="form-grid">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="title" class="form-label">
+                            <span class="label-icon">📝</span>
+                            Video Title
+                        </label>
+                        <input type="text" value="<%= videoDetails.title %>" name="edit[title]" id="title" class="form-control signup-input" required>
+                        <div class="invalid-feedback">Please provide a valid title.</div>
+                        <div class="valid-feedback">Looks good!</div>
+                        <p class="input-hint">Update your video's main heading</p>
+                    </div>
 
-        <div class="form-group">
-            <label for="edit[thumbnail]">Thumbnail URL</label>
-            <input type="url" name="edit[thumbnail]" value="<%=videoDetails.thumbnail%>" class="form-control edit-input" required>
-            <div class="invalid-feedback">
-              Please provide a valid URL for your thumbnail.
-            </div>
-        </div>
+                    <div class="form-group">
+                        <label for="description" class="form-label">
+                            <span class="label-icon">📄</span>
+                            Description
+                        </label>
+                        <textarea name="edit[description]" id="description" class="form-control signup-input" rows="5" required><%= videoDetails.description %></textarea>
+                        <div class="invalid-feedback">Please provide a valid description.</div>
+                        <div class="valid-feedback">Looks good!</div>
+                        <p class="input-hint">Tell viewers what's new or changed about this video</p>
+                    </div>
 
-        <button type="submit" class="edit-btn" onclick="createRipple(event)">Edit</button>
+                    <div class="form-group">
+                        <label for="thumbnail" class="form-label">
+                            <span class="label-icon">🖼️</span>
+                            Thumbnail URL
+                        </label>
+                        <input type="url" name="edit[thumbnail]" id="thumbnail" value="<%= videoDetails.thumbnail %>" class="form-control signup-input" required>
+                        <div class="invalid-feedback">Please provide a valid thumbnail URL.</div>
+                        <p class="input-hint">Use a high-quality image for better appeal</p>
+                    </div>
+                </div>
+
+                <aside class="preview-panel">
+                    <div class="preview-card">
+                        <h3 class="preview-title">Live Preview</h3>
+                        <div class="preview-content">
+                            <div class="thumbnail-preview">
+                                <img id="thumbnailPreview" src="<%= videoDetails.thumbnail %>" alt="Thumbnail preview">
+                                <div class="preview-overlay">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="preview-details">
+                                <h4 id="previewTitle" class="preview-video-title"><%= videoDetails.title %></h4>
+                                <p id="previewDesc" class="preview-video-desc"><%= videoDetails.description.substring(0, 150) %></p>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="edit-btn-modern" onclick="createRipple(event)">
+                    <span>✓ Save Changes</span>
+                </button>
+            </div>
         </form>
     </div>
+</div>
 
-    <script>
-        function createRipple(event) {
-            const button = event.currentTarget;
-            const circle = document.createElement("span");
-            const diameter = Math.max(button.clientWidth, button.clientHeight);
-            const radius = diameter / 2;
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const titleInput = document.getElementById('title');
+        const descInput = document.getElementById('description');
+        const thumbnailInput = document.getElementById('thumbnail');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewDesc = document.getElementById('previewDesc');
+        const previewThumb = document.getElementById('thumbnailPreview');
 
-            circle.style.width = circle.style.height = `${diameter}px`;
-            circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
-            circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
-            circle.classList.add("ripple");
+        titleInput.addEventListener('input', function() {
+            previewTitle.textContent = this.value || 'Your Video Title';
+        });
 
-            const ripple = button.getElementsByClassName("ripple")[0];
+        descInput.addEventListener('input', function() {
+            previewDesc.textContent = (this.value || '').substring(0, 150);
+        });
 
-            if (ripple) {
-                ripple.remove();
+        thumbnailInput.addEventListener('change', function() {
+            if (this.value) {
+                previewThumb.src = this.value;
+                previewThumb.onerror = function() {
+                    previewThumb.src = 'https://via.placeholder.com/320x180?text=Invalid+Image';
+                };
             }
+        });
+    });
 
-            button.appendChild(circle);
+    function createRipple(event) {
+        const button = event.currentTarget;
+        const circle = document.createElement("span");
+        const diameter = Math.max(button.clientWidth, button.clientHeight);
+        const radius = diameter / 2;
+
+        circle.style.width = circle.style.height = `${diameter}px`;
+        circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+        circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+        circle.classList.add("ripple");
+
+        const ripple = button.getElementsByClassName("ripple")[0];
+
+        if (ripple) {
+            ripple.remove();
         }
-    </script>
+
+        button.appendChild(circle);
+    }
+</script>

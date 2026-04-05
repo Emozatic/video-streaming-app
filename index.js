@@ -20,6 +20,7 @@ const { register } = require("module");
 const {saveRedirectUrl}=require("./middleware")
 const {isOwner}= require("./middleware");
 const {isCommentOwner}= require("./middleware");
+const listingController= require("./controller/listing")
 
 app.set("view engine","ejs");
 app.engine("ejs",ejsMate);
@@ -129,66 +130,24 @@ app.get("/logout", (req,res)=>{
 
 
 //index route
-app.get("/home",asyncWrap(async(req,res)=>{
-    let allVideos=await Video.find({});
-    res.render("home.ejs",{allVideos});
-}));
+app.get("/home",asyncWrap(listingController.index))
 
 //new route
-app.get("/home/new",isloggedIn,asyncWrap(async(req,res)=>{
-    res.render("new.ejs");
-}));
+app.get("/home/new",isloggedIn,asyncWrap(listingController.new));
 
 //show route
-app.get("/home/:id",asyncWrap(async(req,res)=>{
-    let{id}=req.params;
-    if(!mongoose.Types.ObjectId.isValid(id)){
-        req.flash("error","Video not found");
-        return res.redirect("/home")
-    }
-    let allVideos=await Video.find({});
-    let showVideo= await Video.findById(id).populate("comments");
-    if(!showVideo){
-        req.flash("error","Video not found");
-        return res.redirect("/home");
-    }
-    res.render("show.ejs",{showVideo, allVideos});
-}));
+app.get("/home/:id",asyncWrap(listingController.show));
 
 //post route for upload
-app.post("/home",isloggedIn,validateListing,asyncWrap(async(req,res)=>{
-    let newVideo= new Video(req.body.new);
-    await newVideo.save().then((res)=>{console.log(res)});
-    req.flash("success","New Video Uploaded");
-    res.redirect("/home");
-}));
+app.post("/home",isloggedIn,validateListing,asyncWrap(listingController.postUpload));
 
 //Edit route
-app.get("/home/edit/:id",isloggedIn,asyncWrap(async(req,res)=>{
-    let {id}= req.params;
-   let videoDetails= await Video.findById(id);
-   if(!videoDetails){
-    throw new ExpressError("Video not found",404);
-   };
-    res.render("edit.ejs",{videoDetails});
-}));
+app.get("/home/edit/:id",isloggedIn,asyncWrap(listingController.edit));
 
-app.put("/home/:id",isloggedIn,isOwner,validateListing,asyncWrap(async(req,res)=>{
-    let {id}= req.params;
-    let updated=await Video.findByIdAndUpdate(id,{...req.body.edit});
-    console.log(updated);
-    req.flash("success","Video Updated");
-    res.redirect("/home");
-}));
+app.put("/home/:id",isloggedIn,isOwner,validateListing,asyncWrap(listingController.putEdit));
 
 //Destroy Route
-app.delete("/home/:id",isloggedIn,isOwner,asyncWrap(async(req,res)=>{
-    let {id}= req.params;
-    let deletedVideo= await Video.findByIdAndDelete(id);
-    console.log(deletedVideo);
-    req.flash("success","Video Deleted");
-    res.redirect("/home");
-}));
+app.delete("/home/:id",isloggedIn,isOwner,asyncWrap(listingController.destroy));
 
 //function for comment validation
 const validComment= (req,res,next)=>{
@@ -203,30 +162,11 @@ const validComment= (req,res,next)=>{
 }
 
 //Commet route
-app.post("/home/:id/comments",isloggedIn,validComment,asyncWrap(async(req,res)=>{    
-    let {id}= req.params;
-    let video= await Video.findById(id).populate({path:"comments", populate:{path:"author", model:"User"}});;
-    let newComment= new Comment({comment: req.body.comments});
-    newComment.author= req.user.id;
-    console.log(video.comments);
-    console.log(video.comments[0].author);
-    video.comments.push(newComment);
-    await newComment.save();
-    await video.save();
-    req.flash("success","Comment Added");
-    res.redirect(`/home/${id}`);
-}));
+app.post("/home/:id/comments",isloggedIn,validComment,asyncWrap(listingController.comment));
 
 //Delete comment route
 
-app.delete("/home/:id/comments/:commentId",isloggedIn,isCommentOwner,asyncWrap(async(req,res)=>{
-    let {id, commentId}= req.params;
-    let video= await Video.findById(id);
-    video.comments.pull({_id: commentId});
-    await video.save();
-    req.flash("success","Comment Deleted");
-    res.redirect(`/home/${id}`);
-}));
+app.delete("/home/:id/comments/:commentId",isloggedIn,isCommentOwner,asyncWrap(listingController.deleteComment));
 
 
 

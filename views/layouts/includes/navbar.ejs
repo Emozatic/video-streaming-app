@@ -1,29 +1,58 @@
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#"><i class="fa-solid fa-video"></i></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-          <a class="nav-link active" aria-current="page" href="/home">Home</a>
-          <a class="nav-link" href="/home/new">Upload</a>
-        
-        <div class="navbar-nav ms-auto">
-         <%if(!currUser){%>
-          <a href="/signup">Signup</a>
-         <a href="/login">Login</a>
-         <%}%>
-         <%if(currUser){%>
-         <a href="/logout">Logout</a>
-         <%}%>
+<!-- Bottom Navbar -->
+<nav class="bottom-navbar">
+    <div class="navbar-container">
+        <a href="/home" class="navbar-brand" title="Home">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            <span class="brand-text">StreamHub</span>
+        </a>
+
+        <div class="navbar-menu">
+            <a href="/home" class="nav-item" title="Home">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <span>Home</span>
+            </a>
+            <a href="/home/new" class="nav-item" title="Upload Video">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                <span>Upload</span>
+            </a>
+
+            <% if (!currUser) { %>
+                <a href="/signup" class="nav-item" title="Sign Up">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <span>Signup</span>
+                </a>
+                <a href="/login" class="nav-item" title="Login">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3"/>
+                    </svg>
+                    <span>Login</span>
+                </a>
+            <% } %>
+
+            <% if (currUser) { %>
+                <div class="nav-user">
+                    <span class="user-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </span>
+                    <span class="user-name"><%= currUser.username %></span>
+                </div>
+                <a href="/logout" class="nav-item logout-btn" title="Logout">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                    </svg>
+                    <span>Logout</span>
+                </a>
+            <% } %>
         </div>
-
-
-      
-        
-       
-      </ul>
     </div>
-  </div>
 </nav>

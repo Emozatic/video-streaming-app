@@ -1,28 +1,53 @@
 <% layout("/layouts/boilerplate") %>
 
-<div class="signup-container">
-    <form action="/login" method="POST" class="needs-validation login-form" novalidate>
-        <h1 class="login-title">Login Your account</h1>
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" name="username" class="form-control signup-input" required>
-            <div class="invalid-feedback">
-              Please provide a valid username.
+<div class="auth-page">
+    <div class="auth-shell">
+        <section class="auth-preview">
+            <div class="auth-preview-top">
+                <span class="auth-tag">Welcome Back</span>
+                <h2>Stream smarter, faster, and in style.</h2>
             </div>
-            <div class="valid-feedback">
-              Looks Good
+            <p class="auth-copy">
+                Login to access your playlists, continue watching, and discover fresh videos with a smooth experience designed for every screen.
+            </p>
+            <div class="auth-metrics">
+                <div>
+                    <strong>99.9%</strong>
+                    <span>Uptime</span>
+                </div>
+                <div>
+                    <strong>24/7</strong>
+                    <span>Playback</span>
+                </div>
             </div>
-        </div>
+        </section>
 
-       
-
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" name="password" class="form-control signup-input" required>
-            <div class="invalid-feedback">
-              Please provide a valid password.
+        <form action="/login" method="POST" class="login-card needs-validation" novalidate>
+            <div class="login-header">
+                <h1 class="login-title">Login to your account</h1>
+                <p>Enter credentials below to continue streaming.</p>
             </div>
-        </div>
 
-        <button type="submit" class="signup-btn" onclick="createRipple(event)">Sign Up</button>
-    </form>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" class="form-control signup-input" required>
+                <div class="invalid-feedback">
+                    Please provide a valid username.
+                </div>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" class="form-control signup-input" required>
+                <div class="invalid-feedback">
+                    Please provide a valid password.
+                </div>
+            </div>
+
+            <button type="submit" class="signup-btn" onclick="createRipple(event)">Login</button>
+        </form>
+    </div>
+</div>
