@@ -8,16 +8,22 @@
     <iframe src="<%=showVideo.video.url.replace('watch?v=','embed/')%>" frameborder="0" height="350" width="600" allowfullscreen></iframe> -->
     <p><b><%=showVideo.title%></b></p>
     <form action="/home/edit/<%=showVideo._id%>">
+        <%if(currUser && currUser._id.equals(showVideo.owner._id)){%>
                 <button class="mb-2">Edit</button>
+            <%}%>
             </form>
             <form action="/home/<%=showVideo._id%>?_method=DELETE" method="POST">
-                <button class="mb-2">Delete</button>
+                <%if(currUser && currUser._id.equals(showVideo.owner._id)){%>
+                <button class="mb-2">
+                    Delete</button>
+                <%}%>
             </form>
 
 
             <!-- comments -->
              <div class="col-5 mb-3">
                 <h4>Comments</h4>
+                <%if(currUser){%>
                 <hr>
                 <form action="/home/<%=showVideo._id%>/comments" method="POST" class="needs-validation" novalidate>
                     <div class="mb-3 mt-3">
@@ -26,6 +32,7 @@
                     </div>
                     <button type="submit">Submit</button>
                 </form>
+                <%}%>
              </div>
 
              <!-- show comments -->
@@ -34,7 +41,7 @@
               <!-- <div class="row"> -->
                 <% for(let comment of showVideo.comments){%>
              <div class="card col-5 mb-3">
-                <h5 class="card-title">Lucky</h5>
+                <h5 class="card-title"><%=comment.author.username%></h5>
                 <p class="card-text"><%=comment.comment%></p>
                 <form action="/home/<%=showVideo._id%>/comments/<%=comment._id%>?_method=DELETE" method="POST">
                     <button class="btn btn-danger">Delete</button>

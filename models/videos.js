@@ -17,7 +17,11 @@ let videoSchema= new Schema({
     comments:[{
         type:Schema.Types.ObjectId,
         ref:"Comment"
-    }]
+    }],
+    owner:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User",
+    }
     
 },{timestamps:true});
 

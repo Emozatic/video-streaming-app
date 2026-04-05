@@ -17,6 +17,8 @@ const User= require("./models/user");
 const passport = require("passport");
 const {isloggedIn}= require("./middleware");
 const { register } = require("module");
+const {saveRedirectUrl}=require("./middleware")
+const {isOwner}= require("./middleware");
 
 app.set("view engine","ejs");
 app.engine("ejs",ejsMate);
@@ -75,15 +77,6 @@ const validateListing= (req,res,next)=>{
     next();
 };
 
-//demo user
-// app.get("/demoUser",async(req,res)=>{
-//     let fakeUser= new User({
-//         email:"lk@gmail.com",
-//         username:"lucky"
-//     })
-//     let registeredUser= await User.register(fakeUser,"lucky123");
-//     res.send(registeredUser);   
-// })
 
 //sigup route
 app.get("/signup",(req,res)=>{
@@ -115,9 +108,11 @@ app.get("/login",(req,res)=>{
     res.render("login.ejs");
 });
 
-app.post("/login",passport.authenticate("local",{failureFlash:true}),asyncWrap(async(req,res)=>{
+app.post("/login",saveRedirectUrl,passport.authenticate("local",{failureFlash:true}),asyncWrap(async(req,res)=>{
     req.flash("success","welcome back!");
-    res.redirect("/home");
+    // res.redirect("/home");
+    let redirectUrl= res.locals.redirectUrl || "/home" ;
+    res.redirect(redirectUrl);
 }));
 
 //logout route
@@ -144,7 +139,7 @@ app.get("/home/new",isloggedIn,asyncWrap(async(req,res)=>{
 }));
 
 //show route
-app.get("/home/:id",isloggedIn,asyncWrap(async(req,res)=>{
+app.get("/home/:id",asyncWrap(async(req,res)=>{
     let{id}=req.params;
     if(!mongoose.Types.ObjectId.isValid(id)){
         req.flash("error","Video not found");
@@ -177,7 +172,7 @@ app.get("/home/edit/:id",isloggedIn,asyncWrap(async(req,res)=>{
     res.render("edit.ejs",{videoDetails});
 }));
 
-app.put("/home/:id",validateListing,asyncWrap(async(req,res)=>{
+app.put("/home/:id",isloggedIn,isOwner,validateListing,asyncWrap(async(req,res)=>{
     let {id}= req.params;
     let updated=await Video.findByIdAndUpdate(id,{...req.body.edit});
     console.log(updated);
@@ -186,7 +181,7 @@ app.put("/home/:id",validateListing,asyncWrap(async(req,res)=>{
 }));
 
 //Destroy Route
-app.delete("/home/:id",isloggedIn,asyncWrap(async(req,res)=>{
+app.delete("/home/:id",isloggedIn,isOwner,asyncWrap(async(req,res)=>{
     let {id}= req.params;
     let deletedVideo= await Video.findByIdAndDelete(id);
     console.log(deletedVideo);
@@ -207,10 +202,13 @@ const validComment= (req,res,next)=>{
 }
 
 //Commet route
-app.post("/home/:id/comments",validComment,asyncWrap(async(req,res)=>{    
+app.post("/home/:id/comments",isloggedIn,validComment,asyncWrap(async(req,res)=>{    
     let {id}= req.params;
-    let video= await Video.findById(id);
+    let video= await Video.findById(id).populate({path:"comments", populate:{path:"author", model:"User"}});;
     let newComment= new Comment({comment: req.body.comments});
+    newComment.author= req.user.id;
+    console.log(video.comments);
+    console.log(video.comments[0].author);
     video.comments.push(newComment);
     await newComment.save();
     await video.save();
