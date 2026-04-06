@@ -1,3 +1,7 @@
+require("dotenv").config();
+console.log(process.env.CLOUD_API_SECRET)
+console.log(process.env.CLOUD_API_KEY)
+console.log(process.env.CLOUD_NAME)
 const express= require("express");
 const app= express();
 const mongoose= require("mongoose");
@@ -21,6 +25,9 @@ const {saveRedirectUrl}=require("./middleware")
 const {isOwner}= require("./middleware");
 const {isCommentOwner}= require("./middleware");
 const listingController= require("./controller/listing")
+const multer= require("multer");
+const {storage}= require("./cloudConfig");
+const upload= multer({storage});
 
 app.set("view engine","ejs");
 app.engine("ejs",ejsMate);
@@ -139,7 +146,7 @@ app.get("/home/new",isloggedIn,asyncWrap(listingController.new));
 app.get("/home/:id",asyncWrap(listingController.show));
 
 //post route for upload
-app.post("/home",isloggedIn,validateListing,asyncWrap(listingController.postUpload));
+app.post("/home",isloggedIn,upload.single("new[thumbnail]"),validateListing,asyncWrap(listingController.postUpload));
 
 //Edit route
 app.get("/home/edit/:id",isloggedIn,asyncWrap(listingController.edit));

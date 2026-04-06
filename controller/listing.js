@@ -35,8 +35,20 @@ module.exports.show=async(req,res)=>{
 
 //post for new/upload
 module.exports.postUpload=async(req,res)=>{
-       let newVideo= new Video(req.body.new);
-    await newVideo.save().then((res)=>{console.log(res)});
+    console.log(req.file);
+    if(!req.file){
+        req.flash("error","Please upload a video");
+        return res.redirect("/home");
+    }
+
+    let url= req.file.path;
+    let filename= req.file.filename;
+       
+    let newVideo= new Video(req.body.new)
+    newVideo.thumbnail={url,filename};
+
+    const savedVideo= await newVideo.save();
+    
     req.flash("success","New Video Uploaded");
     res.redirect("/home");
 }
