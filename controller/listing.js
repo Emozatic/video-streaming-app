@@ -16,6 +16,29 @@ module.exports.new= async(req,res)=>{
   res.render("new.ejs");   
 }
 
+//post for new/upload
+module.exports.postUpload=async(req,res)=>{
+    console.log(req.file);
+    if(!req.file){
+        req.flash("error","Please upload a video");
+        return res.redirect("/home");
+    }
+
+    let url= req.file.path;
+    let filename= req.file.filename;
+       
+    let newVideo= new Video(req.body.new)
+    newVideo.thumbnail={url,filename};
+    newVideo.owner= req.user._id;
+
+    const savedVideo= await newVideo.save();
+    console.log(savedVideo);
+    
+    req.flash("success","New Video Uploaded");
+    res.redirect("/home");
+}
+
+
 //show route
 module.exports.show=async(req,res)=>{
     
@@ -33,25 +56,6 @@ module.exports.show=async(req,res)=>{
         res.render("show.ejs",{showVideo, allVideos});
 }
 
-//post for new/upload
-module.exports.postUpload=async(req,res)=>{
-    console.log(req.file);
-    if(!req.file){
-        req.flash("error","Please upload a video");
-        return res.redirect("/home");
-    }
-
-    let url= req.file.path;
-    let filename= req.file.filename;
-       
-    let newVideo= new Video(req.body.new)
-    newVideo.thumbnail={url,filename};
-
-    const savedVideo= await newVideo.save();
-    
-    req.flash("success","New Video Uploaded");
-    res.redirect("/home");
-}
 
 
 //edit route

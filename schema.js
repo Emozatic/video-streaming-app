@@ -5,7 +5,6 @@ module.exports.videoSchema= Joi.object({
     }).required(),
     title: Joi.string().required(),
     description: Joi.string().required(),
-    thumbnail: Joi.string().required(),
     
 });
 

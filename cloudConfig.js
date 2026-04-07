@@ -12,7 +12,8 @@ const storage= new CloudinaryStorage({
     params:{
         folder:"streamhub-DEV",
         resource_type:"auto",
-        allowed_formats:['png', 'jpg', 'jpeg']
+        allowed_formats:['png', 'jpg', 'jpeg'],
+        upload_preset: process.env.CLOUD_UPLOAD_PRESET
     }
 });
 

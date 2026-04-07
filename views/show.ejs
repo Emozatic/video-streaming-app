@@ -79,7 +79,7 @@
             <div class="related-list">
                 <% for (let video of allVideos) { %>
                     <a href="/home/<%= video._id %>" class="related-item">
-                        <img src="<%= video.thumbnail %>" alt="<%= video.title %> thumbnail">
+                        <img src="<%= video.thumbnail.url%>" alt="<%= video.title %> thumbnail">
                         <div class="related-content">
                             <p class="related-title"><%= video.title %></p>
                         </div>

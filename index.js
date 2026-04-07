@@ -1,7 +1,7 @@
 require("dotenv").config();
-console.log(process.env.CLOUD_API_SECRET)
-console.log(process.env.CLOUD_API_KEY)
-console.log(process.env.CLOUD_NAME)
+// console.log(process.env.CLOUD_API_SECRET)
+// console.log(process.env.CLOUD_API_KEY)
+// console.log(process.env.CLOUD_NAME)
 const express= require("express");
 const app= express();
 const mongoose= require("mongoose");

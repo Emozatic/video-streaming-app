@@ -10,7 +10,10 @@ let videoSchema= new Schema({
         type:String,
         require:true,
     },
-    thumbnail:String,
+    thumbnail:{
+        url:String,
+        filename:String,
+    },
     video:{
         url:String,
     },
