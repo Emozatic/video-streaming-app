@@ -146,7 +146,7 @@ app.get("/home/new",isloggedIn,asyncWrap(listingController.new));
 app.get("/home/:id",asyncWrap(listingController.show));
 
 //post route for upload
-app.post("/home",isloggedIn,upload.single("new[thumbnail]"),validateListing,asyncWrap(listingController.postUpload));
+app.post("/home",isloggedIn,upload.fields([{name:"thumbnail",maxCount:1},{name:"video",maxCount:1}]),validateListing,asyncWrap(listingController.postUpload));
 
 //Edit route
 app.get("/home/edit/:id",isloggedIn,asyncWrap(listingController.edit));

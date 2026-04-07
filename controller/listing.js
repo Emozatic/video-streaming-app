@@ -24,11 +24,23 @@ module.exports.postUpload=async(req,res)=>{
         return res.redirect("/home");
     }
 
-    let url= req.file.path;
-    let filename= req.file.filename;
-       
-    let newVideo= new Video(req.body.new)
-    newVideo.thumbnail={url,filename};
+    const thumbnailFile= req.files.thumbnail[0];
+    const videoFile= req.files.video[0];
+
+    const thumbnailResult= await cloudinary.uploader.upload(thumbnailFile.path);
+    const videoResult= await cloudinary.uploader.upload(videoFile.path, {resource_type: "video"});
+
+    let newVideo= new Video(req.body.new);
+
+    newVideo.thumbnail={
+        url: thumbnailResult.secure_url,
+        filename: thumbnailResult.public_id,
+    };
+
+    newVideo.video={
+        url: videoResult.secure_url,
+        filename: videoResult.public_id,
+    }
     newVideo.owner= req.user._id;
 
     const savedVideo= await newVideo.save();
