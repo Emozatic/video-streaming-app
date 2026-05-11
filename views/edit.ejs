@@ -81,6 +81,8 @@
         const previewTitle = document.getElementById('previewTitle');
         const previewDesc = document.getElementById('previewDesc');
         const previewThumb = document.getElementById('thumbnailPreview');
+        const form = document.querySelector('.edit-form-modern');
+        const submitBtn = form.querySelector('button[type="submit"]');
 
         titleInput.addEventListener('input', function() {
             previewTitle.textContent = this.value || 'Your Video Title';
@@ -97,6 +99,17 @@
                     previewThumb.src = 'https://via.placeholder.com/320x180?text=Invalid+Image';
                 };
             }
+        });
+
+        // Add loading spinner on form submission
+        form.addEventListener('submit', (e) => {
+            if (form.checkValidity() === false) {
+                e.preventDefault();
+                e.stopPropagation();
+            } else {
+                SpinnerHandler.addToButton(submitBtn, 'Saving...');
+            }
+            form.classList.add('was-validated');
         });
     });
 

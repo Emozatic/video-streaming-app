@@ -92,6 +92,7 @@
         const previewDesc = document.getElementById('previewDesc');
         const previewThumb = document.getElementById('thumbnailPreview');
 
+        // Live preview updates
         titleInput.addEventListener('input', function() {
             previewTitle.textContent = this.value || 'Your Video Title Here';
         });
@@ -100,12 +101,77 @@
             previewDesc.textContent = (this.value || 'Your description will appear here...').substring(0, 150);
         });
 
-        thumbnailInput.addEventListener('change', function() {
-            if (this.value) {
-                previewThumb.src = this.value;
-                previewThumb.onerror = function() {
-                    previewThumb.src = 'https://via.placeholder.com/320x180?text=Invalid+Image';
-                };
+        // Thumbnail preview with file validation
+        thumbnailInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                Toast.error('Invalid Image', 'Please select JPG, PNG, or WebP');
+                thumbnailInput.value = '';
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                Toast.error('File Too Large', 'Image must be smaller than 5MB');
+                thumbnailInput.value = '';
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewThumb.src = event.target.result;
+                previewThumb.style.transition = 'opacity 0.3s ease';
+                previewThumb.style.opacity = '1';
+                Toast.success('Image Selected', `${file.name} - Ready to upload`);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Video file validation
+        const videoInput = document.getElementById('url');
+        videoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            const validTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
+            if (!validTypes.includes(file.type)) {
+                Toast.error('Invalid Video', 'Please select MP4, WebM, or MOV format');
+                videoInput.value = '';
+                return;
+            }
+
+            // Check file size (max 5GB)
+            const maxSize = 5 * 1024 * 1024 * 1024;
+            if (file.size > maxSize) {
+                Toast.error('File Too Large', 'Video must be smaller than 5GB');
+                videoInput.value = '';
+                return;
+            }
+
+            // Show success
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            Toast.success('Video Selected', `${file.name} (${sizeMB} MB)`);
+        });
+
+        // Initialize upload handler
+        UploadHandler.setupForm('.upload-form', {
+            onStart: () => {
+                console.log('Upload started');
+            },
+            onProgress: (percent, speed, loaded, total) => {
+                console.log(`Upload: ${percent}% at ${speed.toFixed(2)} MB/s`);
+            },
+            onComplete: () => {
+                console.log('Upload complete');
+            },
+            onError: (error) => {
+                console.error('Upload error:', error);
             }
         });
     });

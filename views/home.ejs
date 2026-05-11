@@ -1,11 +1,11 @@
 <% layout("/layouts/boilerplate") %>
 <div class="container-fluid px-3">
-    <div class="video-grid">
+    <div class="video-grid" id="videoGrid">
         <% for (let video of allVideos) { %>
             <a href="/home/<%= video._id %>" class="video-link">
                 <article class="video-card">
                     <div class="video-card-media">
-                        <img src="<%= video.thumbnail.url %>" class="card-img-top" alt="<%= video.title %> thumbnail">
+                        <img src="<%= video.thumbnail.url %>" class="card-img-top" alt="<%= video.title %> thumbnail" loading="lazy">
                         <span class="video-badge">Watch</span>
                     </div>
                     <div class="video-card-details">
@@ -16,3 +16,16 @@
         <% } %>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize lazy loading for images
+        LazyLoadImages.init();
+        
+        // Add subtle animation on page load
+        const cards = document.querySelectorAll('.video-card');
+        cards.forEach((card, index) => {
+            card.style.animation = `fadeInUp 0.5s ease ${index * 0.05}s both`;
+        });
+    });
+</script>

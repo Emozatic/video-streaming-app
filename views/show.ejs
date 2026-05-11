@@ -22,9 +22,28 @@
                 </div>
 
                 <div class="video-wrapper">
-                    <video id="videoPlayer" controls class="video-player">
-                        <source src="<%= showVideo.video.url %>">
-                    </video>
+                    <video id="videoPlayer" controls class="video-player"></video>
+                    <div id="abrBadge" class="abr-badge" hidden aria-live="polite"></div>
+                    <div class="abr-info-tooltip">
+                        <span class="info-icon">ℹ</span>
+                        <span class="info-text">Video quality adjusts automatically based on your connection speed</span>
+                    </div>
+                </div>
+                <div class="quality-control-container">
+                    <button id="qualityToggleBtn" class="quality-toggle-btn" title="Open quality settings" aria-label="Quality settings">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <circle cx="19" cy="12" r="1"></circle>
+                            <circle cx="5" cy="12" r="1"></circle>
+                        </svg>
+                        <span class="quality-label-text">Quality</span>
+                        <span id="qualityIndicator" class="quality-indicator">Auto</span>
+                    </button>
+                    <div id="videoQualityRow" class="video-quality-row">
+                        <select id="qualitySelect" class="video-quality-select" title="Choose video quality" aria-label="Playback quality">
+                            <option value="">Loading quality options...</option>
+                        </select>
+                    </div>
                 </div>
 
                 <button id="commentToggleBtn" class="comment-toggle-btn">
@@ -50,13 +69,13 @@
                     <% } %>
                 </div>
 
-                <div class="comments-list">
+                <div class="comments-list" id="commentsList">
                     <div class="comments-header">
                         <h4>All Comments</h4>
                         <span><%= showVideo.comments.length %> comments</span>
                     </div>
                     <% for (let comment of showVideo.comments) { %>
-                        <div class="comment-item">
+                        <div class="comment-item fadeInUp">
                             <div class="comment-author"><%= comment.author.username %></div>
                             <p class="comment-text"><%= comment.comment %></p>
                             <% if (currUser && currUser._id.equals(comment.author._id)) { %>
@@ -78,8 +97,8 @@
             </div>
             <div class="related-list">
                 <% for (let video of allVideos) { %>
-                    <a href="/home/<%= video._id %>" class="related-item">
-                        <img src="<%= video.thumbnail.url%>" alt="<%= video.title %> thumbnail">
+                    <a href="/home/<%= video._id %>" class="related-item fadeInUp">
+                        <img src="<%= video.thumbnail.url%>" alt="<%= video.title %> thumbnail" loading="lazy">
                         <div class="related-content">
                             <p class="related-title"><%= video.title %></p>
                         </div>
@@ -117,4 +136,295 @@
         window.addEventListener('resize', updateToggleVisibility);
         updateToggleVisibility();
     }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+<script>
+(function () {
+    var video = document.getElementById('videoPlayer');
+    if (!video) return;
+    var hlsSrc = '/streams/<%= showVideo._id %>/master.m3u8';
+    var mp4Src = <%- JSON.stringify(showVideo.video.url) %>;
+    var qualityRow = document.getElementById('videoQualityRow');
+    var qualitySelect = document.getElementById('qualitySelect');
+    var abrBadge = document.getElementById('abrBadge');
+    var qualityToggleBtn = document.getElementById('qualityToggleBtn');
+    var qualityIndicator = document.getElementById('qualityIndicator');
+    var hlsInstance = null;
+
+    function hideAbrBadge() {
+        if (abrBadge) {
+            abrBadge.hidden = true;
+            abrBadge.textContent = '';
+        }
+    }
+
+    function hideQualityRow() {
+        if (qualityRow) qualityRow.hidden = true;
+        if (qualitySelect) {
+            qualitySelect.innerHTML = '';
+            qualitySelect.disabled = true;
+        }
+    }
+
+    function showQualityRow() {
+        if (qualityRow) qualityRow.hidden = false;
+        if (qualitySelect) qualitySelect.disabled = false;
+    }
+
+    function toggleQualityRow() {
+        if (qualityRow && !qualityRow.hidden) {
+            qualityRow.hidden = true;
+            if (qualityToggleBtn) qualityToggleBtn.classList.remove('active');
+        } else if (qualityRow) {
+            qualityRow.hidden = false;
+            if (qualityToggleBtn) qualityToggleBtn.classList.add('active');
+            if (qualitySelect) qualitySelect.focus();
+        }
+    }
+
+    if (qualityToggleBtn) {
+        qualityToggleBtn.addEventListener('click', toggleQualityRow);
+    }
+
+    function loadMp4() {
+        if (hlsInstance) {
+            hlsInstance.destroy();
+            hlsInstance = null;
+        }
+        hideQualityRow();
+        hideAbrBadge();
+        video.removeAttribute('src');
+        video.innerHTML = '';
+        var s = document.createElement('source');
+        s.src = mp4Src;
+        s.type = 'video/mp4';
+        video.appendChild(s);
+        video.load();
+    }
+
+    function bindQualitySelector(hls) {
+        if (!qualityRow || !qualitySelect) {
+            console.error('[HLS] qualityRow or qualitySelect not found');
+            return;
+        }
+        
+        console.log('[HLS] bindQualitySelector called');
+
+        function updateQualityIndicator() {
+            if (!qualityIndicator) return;
+            var idx = hls.currentLevel;
+            var level = (idx >= 0 && idx < hls.levels.length) ? hls.levels[idx] : null;
+            if (hls.autoLevelEnabled) {
+                qualityIndicator.textContent = 'Auto';
+                qualityIndicator.style.background = 'rgba(37, 99, 235, 0.2)';
+            } else if (level) {
+                var h = level.height;
+                qualityIndicator.textContent = h + 'p';
+                qualityIndicator.style.background = 'rgba(34, 197, 94, 0.2)';
+            } else {
+                qualityIndicator.textContent = 'Manual';
+                qualityIndicator.style.background = 'rgba(249, 115, 22, 0.2)';
+            }
+        }
+
+        function fillOptions() {
+            console.log('[HLS] fillOptions called');
+            console.log('[HLS] hls.levels:', hls.levels);
+            console.log('[HLS] hls.levels.length:', hls.levels ? hls.levels.length : 'undefined');
+            
+            qualitySelect.innerHTML = '';
+            
+            // Add Auto option
+            var optAuto = document.createElement('option');
+            optAuto.value = '-1';
+            optAuto.textContent = '🔄 Auto (adaptive bitrate)';
+            qualitySelect.appendChild(optAuto);
+            console.log('[HLS] Added Auto option');
+            
+            // Add quality levels
+            if (hls.levels && hls.levels.length > 0) {
+                console.log('[HLS] Adding ' + hls.levels.length + ' quality levels');
+                hls.levels.forEach(function (level, i) {
+                    var opt = document.createElement('option');
+                    opt.value = String(i);
+                    var h = level.height || 'N/A';
+                    var kb = level.bitrate ? Math.round(level.bitrate / 1000) : 'N/A';
+                    var label = h + 'p @ ' + kb + ' kb/s';
+                    opt.textContent = '📺 ' + label;
+                    qualitySelect.appendChild(opt);
+                    console.log('[HLS] Added quality option:', label);
+                });
+            } else {
+                console.warn('[HLS] No levels available yet');
+                var optLoading = document.createElement('option');
+                optLoading.value = '';
+                optLoading.textContent = 'Loading quality options...';
+                optLoading.disabled = true;
+                qualitySelect.appendChild(optLoading);
+            }
+            
+            qualitySelect.disabled = (hls.levels && hls.levels.length > 0) ? false : true;
+            showQualityRow();
+            if (hls.levels && hls.levels.length > 0) {
+                qualitySelect.value = String(hls.currentLevel);
+            }
+            updateQualityIndicator();
+        }
+
+        // Handle MANIFEST_PARSED event
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            console.log('[HLS] MANIFEST_PARSED event fired');
+            console.log('[HLS] Levels available:', hls.levels.length);
+            fillOptions();
+        });
+
+        // Handle LEVEL_LOADED event (levels might be ready here too)
+        hls.on(Hls.Events.LEVEL_LOADED, function () {
+            console.log('[HLS] LEVEL_LOADED event fired');
+            if (hls.levels.length > 0) {
+                fillOptions();
+            }
+        });
+
+        // Quality selection change handler
+        qualitySelect.addEventListener('change', function () {
+            var v = parseInt(qualitySelect.value, 10);
+            console.log('[HLS] Quality changed to level:', v);
+            hls.currentLevel = isNaN(v) ? -1 : v;
+            updateQualityIndicator();
+        });
+
+        // Handle level switches
+        hls.on(Hls.Events.LEVEL_SWITCHED, function () {
+            console.log('[HLS] LEVEL_SWITCHED to level:', hls.currentLevel);
+            if (document.activeElement !== qualitySelect) {
+                qualitySelect.value = String(hls.currentLevel);
+                updateQualityIndicator();
+            }
+        });
+        
+        // Initial check in case levels are already available
+        setTimeout(function() {
+            if (hls.levels.length > 0 && qualitySelect.options.length <= 1) {
+                console.log('[HLS] Levels already available, filling options');
+                fillOptions();
+            }
+        }, 100);
+    }
+
+    function bindAbrBadge(hls) {
+        if (!abrBadge) return;
+
+        function fmtLevel(level) {
+            if (!level) return 'Adaptive Bitrate';
+            var h = level.height;
+            var w = level.width;
+            var kbps = level.bitrate ? Math.round(level.bitrate / 1000) : 0;
+            var res = h ? (h + 'p') : (w ? (w + 'w') : 'Level');
+            return kbps ? (res + ' @ ' + kbps + ' kb/s') : res;
+        }
+
+        function updateBadge() {
+            if (!hls.levels || !hls.levels.length) return;
+            var idx = hls.currentLevel;
+            var level = (idx >= 0 && idx < hls.levels.length) ? hls.levels[idx] : null;
+            var mode = hls.autoLevelEnabled ? '🔄 ABR' : '📺 Manual';
+            var estKbps = hls.bandwidthEstimate ? Math.round(hls.bandwidthEstimate / 1000) : 0;
+            var qualityStr = fmtLevel(level);
+            var text = mode + ' | ' + qualityStr;
+            if (estKbps) text += ' | ' + estKbps + ' kb/s↓';
+            abrBadge.textContent = text;
+            abrBadge.hidden = false;
+            abrBadge.title = 'Adaptive Bitrate Status: ' + text;
+        }
+
+        hls.on(Hls.Events.MANIFEST_PARSED, updateBadge);
+        hls.on(Hls.Events.LEVEL_SWITCHED, updateBadge);
+        hls.on(Hls.Events.LEVEL_UPDATED, updateBadge);
+        hls.on(Hls.Events.ERROR, function (_evt, data) {
+            if (data && data.fatal) hideAbrBadge();
+        });
+    }
+
+    function attachHls() {
+        console.log('[HLS] attachHls() called, hlsSrc:', hlsSrc);
+        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+            console.log('[HLS] Hls.js is supported');
+            video.innerHTML = '';
+            var hls = new Hls({ enableWorker: true, capLevelToPlayerSize: true, debug: true });
+            hlsInstance = hls;
+            
+            // Add error listener before loading source
+            hls.on(Hls.Events.ERROR, function (_evt, data) {
+                console.error('[HLS] HLS Error:', data);
+                if (data.fatal) {
+                    console.error('[HLS] Fatal error type:', data.type, 'details:', data.details);
+                    hlsInstance = null;
+                    hls.destroy();
+                    loadMp4();
+                }
+            });
+            
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                console.log('[HLS] Manifest parsed successfully');
+            });
+            
+            hls.loadSource(hlsSrc);
+            console.log('[HLS] Source loaded');
+            hls.attachMedia(video);
+            console.log('[HLS] Media attached');
+            bindQualitySelector(hls);
+            bindAbrBadge(hls);
+            return;
+        }
+        console.log('[HLS] Hls.js not supported, trying native HLS');
+        if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            hideQualityRow();
+            hideAbrBadge();
+            video.innerHTML = '';
+            video.src = hlsSrc;
+            video.addEventListener('error', function onErr() {
+                video.removeEventListener('error', onErr);
+                console.log('[HLS] Native HLS failed, falling back to MP4');
+                loadMp4();
+            }, { once: true });
+            return;
+        }
+        console.log('[HLS] No HLS support, loading MP4');
+        loadMp4();
+    }
+
+    var hlsCheckAttempts = 0;
+    var maxHlsCheckAttempts = 30; // Try for ~30 seconds
+    
+    function checkAndLoadHls() {
+        fetch(hlsSrc, { method: 'HEAD', cache: 'no-store' })
+            .then(function (res) {
+                console.log('[HLS] Manifest check #' + hlsCheckAttempts + ' - status:', res.status);
+                if (res.ok) {
+                    console.log('[HLS] Manifest found, attaching HLS');
+                    attachHls();
+                } else if (hlsCheckAttempts < maxHlsCheckAttempts) {
+                    console.log('[HLS] Manifest not ready yet, retrying in 1 second...');
+                    hlsCheckAttempts++;
+                    setTimeout(checkAndLoadHls, 1000);
+                } else {
+                    console.log('[HLS] Manifest still not available after ' + maxHlsCheckAttempts + ' attempts, falling back to MP4');
+                    loadMp4();
+                }
+            })
+            .catch(function (err) {
+                console.log('[HLS] Manifest fetch error (attempt #' + hlsCheckAttempts + '):', err);
+                if (hlsCheckAttempts < maxHlsCheckAttempts) {
+                    hlsCheckAttempts++;
+                    setTimeout(checkAndLoadHls, 1000);
+                } else {
+                    console.log('[HLS] Max retries reached, falling back to MP4');
+                    loadMp4();
+                }
+            });
+    }
+    
+    checkAndLoadHls();
+})();
 </script>

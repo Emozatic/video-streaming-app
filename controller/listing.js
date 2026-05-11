@@ -1,8 +1,13 @@
 const mongoose=require("mongoose");
 const {Schema}= mongoose;
+const path= require("path");
+const fs= require("fs/promises");
 const Video= require("../models/videos");
 const Comment= require("../models/comments")
 const User= require("../models/user");
+const { cloudinary }= require("../cloudConfig");
+const ExpressError= require("../utils/ExpressError");
+const { transcodeVideoToHls }= require("../utils/hlsTranscode");
 
 
 //index route
@@ -18,9 +23,8 @@ module.exports.new= async(req,res)=>{
 
 //post for new/upload
 module.exports.postUpload=async(req,res)=>{
-    console.log(req.file);
-    if(!req.file){
-        req.flash("error","Please upload a video");
+    if(!req.files?.thumbnail?.[0] || !req.files?.video?.[0]){
+        req.flash("error","Please upload a video and thumbnail");
         return res.redirect("/home");
     }
 
@@ -45,6 +49,10 @@ module.exports.postUpload=async(req,res)=>{
 
     const savedVideo= await newVideo.save();
     console.log(savedVideo);
+
+    transcodeVideoToHls(savedVideo._id.toString(), videoResult.secure_url).catch((err)=>{
+        console.error("[HLS] Transcode failed:", err.message);
+    });
     
     req.flash("success","New Video Uploaded");
     res.redirect("/home");
@@ -94,6 +102,10 @@ module.exports.destroy= async(req,res)=>{
     let {id}= req.params;
     let deletedVideo= await Video.findByIdAndDelete(id);
     console.log(deletedVideo);
+    if(deletedVideo){
+        const streamDir= path.join(__dirname, "..", "streams", String(deletedVideo._id));
+        await fs.rm(streamDir, { recursive: true, force: true }).catch(()=>{});
+    }
     req.flash("success","Video Deleted");
     res.redirect("/home");
 }

@@ -1,0 +1,575 @@
+/* ========================================
+   LOADING UX STYLES - DARK THEME
+   ======================================== */
+
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --background: #ffffff;
+    --surface: #f8fafc;
+    --surface-light: #e2e8f0;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --success: #10b981;
+    --error: #ef4444;
+    --shimmer: rgba(0, 0, 0, 0.05);
+}
+
+/* ========================================
+   SKELETON LOADERS
+   ======================================== */
+
+.skeleton-loader {
+    background: linear-gradient(
+        90deg,
+        var(--surface) 0%,
+        var(--surface-light) 50%,
+        var(--surface) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 0.5rem;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Skeleton variants */
+.skeleton-text {
+    height: 1rem;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-text.short {
+    width: 60%;
+}
+
+.skeleton-text.medium {
+    width: 80%;
+}
+
+.skeleton-heading {
+    height: 1.75rem;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.skeleton-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+}
+
+.skeleton-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.75rem;
+}
+
+/* Video card skeleton */
+.skeleton-video-card {
+    background: var(--surface);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    padding: 0;
+}
+
+.skeleton-video-card .skeleton-image {
+    margin: 0;
+}
+
+.skeleton-video-card-content {
+    padding: 1rem;
+}
+
+.skeleton-video-card-title {
+    height: 1.25rem;
+    width: 100%;
+    margin-bottom: 0.75rem;
+}
+
+.skeleton-video-card-desc {
+    height: 0.875rem;
+    width: 85%;
+}
+
+/* Comment skeleton */
+.skeleton-comment {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.skeleton-comment-avatar {
+    flex-shrink: 0;
+}
+
+.skeleton-comment-content {
+    flex: 1;
+    width: 100%;
+}
+
+.skeleton-comment-author {
+    height: 0.875rem;
+    width: 40%;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-comment-text {
+    height: 1rem;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-comment-text:last-child {
+    width: 70%;
+    margin-bottom: 0;
+}
+
+/* ========================================
+   SPINNERS
+   ======================================== */
+
+.spinner-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.spinner {
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--shimmer);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Spinner variants */
+.spinner.small {
+    width: 1rem;
+    height: 1rem;
+    border-width: 1.5px;
+}
+
+.spinner.medium {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.spinner.large {
+    width: 2rem;
+    height: 2rem;
+}
+
+.spinner-text {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.spinner-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.spinner-overlay.hidden {
+    display: none;
+}
+
+.spinner-content {
+    text-align: center;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.spinner-message {
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Inline spinner */
+.spinner-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ========================================
+   PROGRESS BAR
+   ======================================== */
+
+.progress-container {
+    width: 100%;
+    background: var(--surface);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    margin: 1rem 0;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.progress-bar {
+    height: 0.5rem;
+    background: linear-gradient(
+        90deg,
+        var(--primary),
+        #3b82f6,
+        var(--primary)
+    );
+    background-size: 200% 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 0.75rem;
+    animation: progressShimmer 2s infinite;
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+}
+
+@keyframes progressShimmer {
+    0%, 100% {
+        background-position: 200% 0;
+    }
+    50% {
+        background-position: -200% 0;
+    }
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.progress-label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.progress-percent {
+    color: var(--primary);
+    font-weight: 600;
+    min-width: 3rem;
+    text-align: right;
+}
+
+.progress-speed {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* ========================================
+   LOADING STATES - BUTTONS
+   ======================================== */
+
+.btn-loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-loading .btn-text {
+    visibility: hidden;
+}
+
+.btn-loading .spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+button:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+/* ========================================
+   TOAST NOTIFICATIONS
+   ======================================== */
+
+.toast-container {
+    position: fixed;
+    top: 6rem;
+    right: 1rem;
+    z-index: 10000;
+    max-width: 400px;
+}
+
+.toast {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    animation: slideInRight 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast.removing {
+    animation: slideOutRight 0.3s ease forwards;
+}
+
+@keyframes slideOutRight {
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+.toast-icon {
+    flex-shrink: 0;
+    font-size: 1.25rem;
+    margin-top: 0.25rem;
+}
+
+.toast-icon.success {
+    color: var(--success);
+}
+
+.toast-icon.error {
+    color: var(--error);
+}
+
+.toast-icon.info {
+    color: var(--primary);
+}
+
+.toast-content {
+    flex: 1;
+}
+
+.toast-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.toast-message {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.toast-close:hover {
+    color: var(--text-primary);
+}
+
+/* Toast variants */
+.toast.success {
+    border-left: 4px solid var(--success);
+}
+
+.toast.error {
+    border-left: 4px solid var(--error);
+}
+
+.toast.info {
+    border-left: 4px solid var(--primary);
+}
+
+/* ========================================
+   LAZY LOADING IMAGES
+   ======================================== */
+
+img.lazy {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+img.lazy.loaded {
+    opacity: 1;
+}
+
+img.lazy-placeholder {
+    background: var(--surface);
+    backdrop-filter: blur(10px);
+}
+
+/* ========================================
+   LOADING CONTENT AREA
+   ======================================== */
+
+.loading-content {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.content-placeholder {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .content-placeholder {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 640px) {
+    .toast-container {
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+    }
+
+    .spinner-overlay {
+        padding: 1rem;
+    }
+
+    .spinner-content {
+        max-width: 100%;
+    }
+
+    .skeleton-comment {
+        flex-direction: column;
+    }
+
+    .skeleton-comment-avatar {
+        align-self: flex-start;
+    }
+}
+
+/* ========================================
+   ANIMATION UTILITIES
+   ======================================== */
+
+.pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.fadeInUp {
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   DARK THEME SPECIFIC
+   ======================================== */
+
+body {
+    background-color: var(--background);
+    color: var(--text-primary);
+}
+
+/* Ensure skeleton loaders work with existing styles */
+.skeleton-loader,
+.skeleton-video-card {
+    color: transparent;
+}
+
+.skeleton-text,
+.skeleton-heading,
+.skeleton-avatar,
+.skeleton-image {
+    color: transparent;
+    user-select: none;
+    pointer-events: none;
+}

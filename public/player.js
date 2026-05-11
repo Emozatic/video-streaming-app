@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!video) return;
 
     const playBtn = document.querySelector('.play-btn');
+    if (!playBtn) return;
     const volumeBtn = document.querySelector('.volume-btn');
     const volumeSlider = document.querySelector('.volume-slider');
     const progressContainer = document.querySelector('.progress-bar-container');
